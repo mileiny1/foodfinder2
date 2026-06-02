@@ -1,1 +1,1 @@
-web: gunicorn foodfinder.wsgi
+web: gunicorn foodfinder1.wsgi
