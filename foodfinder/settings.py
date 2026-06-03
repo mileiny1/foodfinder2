@@ -21,7 +21,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-change-me")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["foodfinder1.herokuapp.com", "localhost", "127.0.0.1"]  # for dev; later put your domain(s) here
+ALLOWED_HOSTS = ["foodfinder2.herokuapp.com", "localhost", "127.0.0.1"]  # for dev; later put your domain(s) here
 
 # Application definition
 INSTALLED_APPS = [
