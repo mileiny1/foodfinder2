@@ -187,7 +187,6 @@ curl -X POST http://127.0.0.1:8000/api/food/search/ \
 ```
 
 ### Get Search History
-
 ```bash
 curl "http://127.0.0.1:8000/api/my-search-history/?limit=20" \
   -H "Authorization: Bearer <access_token>"
