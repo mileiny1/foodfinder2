@@ -191,7 +191,6 @@ curl -X POST http://127.0.0.1:8000/api/food/search/ \
 curl "http://127.0.0.1:8000/api/my-search-history/?limit=20" \
   -H "Authorization: Bearer <access_token>"
 ```
-
 ## Troubleshooting
 - `OpenAI API key is missing`: set `OPENAI_API_KEY` or keep `ENABLE_MOCK_SEARCH_FALLBACK=1` for local mock results.
 - Database connection errors: verify PostgreSQL credentials in `.env` and that PostgreSQL is running.
