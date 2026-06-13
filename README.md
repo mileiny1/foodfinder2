@@ -1,87 +1,128 @@
 # FoodFinder API
 
-FoodFinder is a Django REST API for user accounts and location-based restaurant search.
-It supports JWT authentication, profile management, and food search powered by OpenAI (with a mock fallback mode for local development).
+> Django REST backend powering AI-assisted restaurant discovery with JWT authentication, location-based search, and optional OpenAI integration.
 
-## Tech Stack
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-REST%20Framework-092E20?style=flat&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
 
-- Python 3.11
-- Django
-- Django REST Framework
-- SimpleJWT (JWT auth)
-- PostgreSQL
-- Pipenv
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [Example Requests](#example-requests)
+- [Running Tests](#running-tests)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Overview
+
+FoodFinder API is a Django REST backend that handles user authentication, profile management, and location-based restaurant search. It integrates with OpenAI to generate AI-backed restaurant recommendations and includes a mock fallback mode for local development.
+
+The frontend counterpart is [AI FoodSearch](https://github.com/), a React + Vite app that communicates with this API.
+
+---
 
 ## Features
 
-- User registration with extended profile fields
-- JWT login and refresh
-- Authenticated profile read/update
-- Authenticated food search by:
-  - query
-  - latitude/longitude
-  - radius
-  - min rating
-  - open now
-  - price range
-- Search history per user
-- Cached search results
-- OpenAI-backed restaurant results with optional mock fallback
+- **Authentication** — JWT-based registration, login, and token refresh
+- **Profile Management** — Extended user profiles with read and update support
+- **Restaurant Search** — Location-aware search filtered by radius, rating, price range, and availability
+- **AI Integration** — OpenAI-powered recommendations with configurable mock fallback
+- **Search History** — Per-user search history tracking
+- **Result Caching** — Optional Redis-backed response caching
 
-## Project Notes
+---
 
-This repository contains a nested `foodfinder/` directory that appears to duplicate parts of the project.
-For normal development, use the root project where `manage.py` is in the repository root.
+## Tech Stack
 
-## Prerequisites
+| Layer | Technology |
+|---|---|
+| Language | Python 3.11 |
+| Framework | Django + Django REST Framework |
+| Authentication | SimpleJWT |
+| Database | PostgreSQL |
+| AI Provider | OpenAI (gpt-4.1-mini) |
+| Dependency Manager | Pipenv |
+| Cache (optional) | Redis |
+
+---
+
+## Project Structure
+
+```
+foodfinder-backend/
+│
+├── api/                          # Core application
+│   ├── migrations/               # Database migrations
+│   ├── services/                 # External integrations
+│   │   ├── ai_openai.py          # OpenAI recommendation engine
+│   │   ├── geo.py                # Geolocation utilities
+│   │   ├── places_google.py      # Google Places integration
+│   │   ├── places_yelp.py        # Yelp integration
+│   │   └── places_router.py      # Provider routing logic
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+│
+├── foodfinder/                   # Django project config
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── .env                          # Environment variables (not committed)
+├── manage.py
+├── Pipfile
+├── requirements.txt
+├── Procfile
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 - Python 3.11
 - Pipenv
-- PostgreSQL running locally (or reachable over network)
+- PostgreSQL (running locally or accessible over the network)
 
-## Environment Variables
+### Installation
 
-Create a `.env` file in the repository root (same directory as `manage.py`):
+**1. Clone the repository**
 
-```env
-DJANGO_SECRET_KEY=dev-secret-change-me
-DEBUG=1
-
-DB_NAME=foodfinder
-DB_USER=foodfinder
-DB_PASSWORD=foodfinder
-DB_HOST=127.0.0.1
-DB_PORT=5432
-
-# OpenAI
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4.1-mini
-
-# If true, API can return mock restaurant data when OpenAI is unavailable
-ENABLE_MOCK_SEARCH_FALLBACK=1
-
-# Optional cache backend (if unset, local in-memory cache is used)
-# REDIS_URL=redis://127.0.0.1:6379/1
-
-# Provider switch (current router path uses OpenAI)
-PLACES_PROVIDER=yelp
+```bash
+git clone https://github.com/your-username/foodfinder-backend.git
+cd foodfinder-backend
 ```
 
-## Local Setup
-
-1. Install dependencies:
+**2. Install dependencies**
 
 ```bash
 pipenv install
-```
-
-2. Activate virtual environment:
-
-```bash
 pipenv shell
 ```
 
-3. Create PostgreSQL database and user (example):
+**3. Configure environment variables**
+
+Copy the example below into a `.env` file at the project root (same directory as `manage.py`). See [Environment Variables](#environment-variables) for details.
+
+**4. Set up the database**
 
 ```sql
 CREATE DATABASE foodfinder;
@@ -89,53 +130,87 @@ CREATE USER foodfinder WITH PASSWORD 'foodfinder';
 GRANT ALL PRIVILEGES ON DATABASE foodfinder TO foodfinder;
 ```
 
-4. Run migrations:
+**5. Run migrations**
 
 ```bash
 python manage.py migrate
 ```
 
-5. Start development server:
+**6. Start the development server**
 
 ```bash
 python manage.py runserver
 ```
 
-API base URL (default):
+The API will be available at `http://127.0.0.1:8000/api/`.
 
-```text
-http://127.0.0.1:8000/api/
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Django
+DJANGO_SECRET_KEY=dev-secret-change-me
+DEBUG=1
+
+# Database
+DB_NAME=foodfinder
+DB_USER=foodfinder
+DB_PASSWORD=foodfinder
+DB_HOST=127.0.0.1
+DB_PORT=5432
+
+# OpenAI
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4.1-mini
+
+# Enable mock restaurant data when OpenAI is unavailable (local dev)
+ENABLE_MOCK_SEARCH_FALLBACK=1
+
+# Places provider
+PLACES_PROVIDER=yelp
+
+# Optional: Redis cache (falls back to in-memory if unset)
+# REDIS_URL=redis://127.0.0.1:6379/1
 ```
 
-## Running Tests
+---
 
-```bash
-python manage.py test
+## API Reference
+
+### Public Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health/` | Health check |
+| `POST` | `/api/auth/register/` | Register a new user |
+| `GET` | `/api/auth/register/options/` | Retrieve registration field options |
+| `POST` | `/api/auth/login/` | Log in and receive JWT tokens |
+| `POST` | `/api/auth/refresh/` | Refresh an access token |
+
+### Authenticated Endpoints
+
+> All authenticated requests require the header: `Authorization: Bearer <access_token>`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/auth/profile/` | Retrieve the current user's profile |
+| `PATCH` | `/api/auth/profile/` | Update the current user's profile |
+| `POST` | `/api/food/search/` | Search for restaurants |
+| `GET` | `/api/my-search-history/?limit=20` | Retrieve recent search history |
+
+### Auth Flow
+
+```
+POST /api/auth/register/   →   Create account
+POST /api/auth/login/      →   Receive access + refresh tokens
+Authorization: Bearer ...  →   Include on all protected requests
+POST /api/auth/refresh/    →   Get a new access token when expired
 ```
 
-## API Endpoints
-
-### Public
-
-- `GET /api/health/`
-- `POST /api/auth/register/`
-- `GET /api/auth/register/options/`
-- `POST /api/auth/login/`
-- `POST /api/auth/refresh/`
-
-### Authenticated (Bearer token required)
-
-- `GET /api/auth/profile/`
-- `PATCH /api/auth/profile/`
-- `POST /api/food/search/`
-- `GET /api/my-search-history/?limit=20`
-
-## Auth Flow (Quick Start)
-
-1. Register user
-2. Login to receive tokens
-3. Send `Authorization: Bearer <access_token>` for protected endpoints
-4. Refresh token via `/api/auth/refresh/` when needed
+---
 
 ## Example Requests
 
@@ -145,15 +220,15 @@ python manage.py test
 curl -X POST http://127.0.0.1:8000/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "newuser@example.com",
+    "email": "user@example.com",
     "password": "securepass123",
     "confirm_password": "securepass123",
-    "name": "New User",
+    "name": "Jane Doe",
     "home_address": "123 Main St",
     "birthday": "1996-07-20",
     "phone_number": "+1 555 101 2020",
     "gender": "female",
-    "preferred_language": "es"
+    "preferred_language": "en"
   }'
 ```
 
@@ -163,12 +238,12 @@ curl -X POST http://127.0.0.1:8000/api/auth/register/ \
 curl -X POST http://127.0.0.1:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "newuser@example.com",
+    "username": "user@example.com",
     "password": "securepass123"
   }'
 ```
 
-### Food Search (Authenticated)
+### Restaurant Search
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/food/search/ \
@@ -187,11 +262,52 @@ curl -X POST http://127.0.0.1:8000/api/food/search/ \
 ```
 
 ### Get Search History
+
 ```bash
 curl "http://127.0.0.1:8000/api/my-search-history/?limit=20" \
   -H "Authorization: Bearer <access_token>"
 ```
+
+---
+
+## Running Tests
+
+```bash
+python manage.py test
+```
+
+---
+
 ## Troubleshooting
-- `OpenAI API key is missing`: set `OPENAI_API_KEY` or keep `ENABLE_MOCK_SEARCH_FALLBACK=1` for local mock results.
-- Database connection errors: verify PostgreSQL credentials in `.env` and that PostgreSQL is running.
-- 401 Unauthorized on protected routes: ensure `Authorization: Bearer <access_token>` is present and token is not expired.
+
+### Missing OpenAI API Key
+
+If the application cannot reach OpenAI, verify `OPENAI_API_KEY` is set in your `.env`. For local development, set `ENABLE_MOCK_SEARCH_FALLBACK=1` to use mock restaurant data instead.
+
+### Database Connection Errors
+
+- Confirm PostgreSQL is running and reachable.
+- Verify `DB_*` values in `.env` match your database configuration.
+- Ensure all migrations have been applied (`python manage.py migrate`).
+
+### 401 Unauthorized
+
+- Include the `Authorization: Bearer <access_token>` header on all protected requests.
+- Access tokens expire — use `POST /api/auth/refresh/` to get a new one.
+- Confirm all auth-related environment variables are correctly configured.
+
+### Works Locally but Fails in Production
+
+This is most commonly caused by missing environment variables or unapplied migrations in the production environment. To resolve:
+
+1. Review deployment and application logs to identify the failure.
+2. Verify all environment variables match your production configuration.
+3. Confirm database connectivity and apply any pending migrations.
+4. Test API endpoints and external service integrations independently.
+5. Redeploy after applying fixes.
+
+---
+
+## License
+
+This project is licensed under the terms in [LICENSE](LICENSE).
