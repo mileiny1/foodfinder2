@@ -60,16 +60,22 @@ The frontend counterpart is [AI FoodSearch](https://github.com/), a React + Vite
 ## Project Structure
 
 ```
-foodfinder-backend/
+foodfinder/                       # Project root
 │
-├── api/                          # Core application
+├── api/                          # Core Django application
 │   ├── migrations/               # Database migrations
-│   ├── services/                 # External integrations
+│   │   ├── __init__.py
+│   │   └── 0001_initial.py
+│   │
+│   ├── services/                 # External service integrations
+│   │   ├── __init__.py
 │   │   ├── ai_openai.py          # OpenAI recommendation engine
 │   │   ├── geo.py                # Geolocation utilities
 │   │   ├── places_google.py      # Google Places integration
-│   │   ├── places_yelp.py        # Yelp integration
-│   │   └── places_router.py      # Provider routing logic
+│   │   ├── places_router.py      # Provider routing logic
+│   │   └── places_yelp.py        # Yelp integration
+│   │
+│   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
 │   ├── models.py
@@ -78,19 +84,24 @@ foodfinder-backend/
 │   ├── urls.py
 │   └── views.py
 │
-├── foodfinder/                   # Django project config
+├── foodfinder/                   # Django project configuration
+│   ├── __init__.py
+│   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
-│   ├── asgi.py
 │   └── wsgi.py
 │
 ├── .env                          # Environment variables (not committed)
+├── .gitignore
+├── LICENSE
 ├── manage.py
 ├── Pipfile
-├── requirements.txt
 ├── Procfile
+├── requirements.txt
 └── README.md
 ```
+
+> **Note:** The repository contains a nested `foodfinder/` directory for Django project configuration. For all development, use the root `manage.py` — not any nested copy.
 
 ---
 
